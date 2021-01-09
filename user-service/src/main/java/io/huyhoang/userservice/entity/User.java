@@ -1,4 +1,4 @@
-package io.huyhoang.userservice.config.entity;
+package io.huyhoang.userservice.entity;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
