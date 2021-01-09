@@ -1,13 +1,13 @@
 package io.huyhoang.userservice.controller;
 
+import io.huyhoang.userservice.dto.LoginRequest;
 import io.huyhoang.userservice.dto.SignupRequest;
 import io.huyhoang.userservice.dto.UserResponse;
 import io.huyhoang.userservice.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
@@ -23,9 +23,15 @@ public class UserController {
         this.userService = userService;
     }
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(value = "/signup")
     public Mono<UserResponse> signup(@Valid @RequestBody SignupRequest signupRequest) {
         return userService.signup(signupRequest);
+    }
+
+    @PostMapping(value = "/login")
+    public Mono<ResponseEntity<UserResponse>> login(@Valid @RequestBody LoginRequest loginRequest) {
+        return userService.login(loginRequest);
     }
 
 }
