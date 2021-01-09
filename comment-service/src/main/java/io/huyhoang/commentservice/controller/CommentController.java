@@ -12,7 +12,7 @@ import javax.validation.Valid;
 import java.util.UUID;
 
 @RestController
-@RequestMapping(value = "/api/posts/{postId}/comments")
+@RequestMapping(value = "/api")
 public class CommentController {
 
     private final CommentService commentService;
@@ -22,13 +22,13 @@ public class CommentController {
     }
 
 
-    @GetMapping
+    @GetMapping(value = "/posts/{postId}/comments")
     public Flux<CommentResponse> allCommentsByPost(@PathVariable("postId") UUID postId) {
         return commentService.allByPost(postId);
     }
 
-    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping(value = "/posts/{postId}/comments")
     public Mono<CommentResponse> addComment(@Valid @RequestBody CommentRequest commentRequest,
                                            @PathVariable("postId") UUID postId) {
 
@@ -41,7 +41,7 @@ public class CommentController {
 
     }
 
-    @PutMapping(value = "/{commentId}")
+    @PutMapping(value = "/comments/{commentId}")
     public Mono<CommentResponse> editComment(@Valid @RequestBody CommentRequest commentRequest,
                                              @PathVariable("commentId") UUID commentId) {
 
@@ -49,8 +49,8 @@ public class CommentController {
         return commentService.edit(commentRequest, commentId);
     }
 
-    @DeleteMapping(value = "/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping(value = "/comments/{commentId}")
     public Mono<Void> deleteComment(@PathVariable("commentId") UUID commentId) {
 
         // check same user;

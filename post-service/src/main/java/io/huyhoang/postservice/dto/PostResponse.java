@@ -1,46 +1,38 @@
-package io.huyhoang.commentservice.dto;
+package io.huyhoang.postservice.dto;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public class CommentResponse implements Serializable {
-
-    private UUID commentId;
+public class PostResponse implements Serializable {
 
     private UUID postId;
 
     private UUID userId;
 
-    private String content;
+    private String imageUrl;
+
+    private String description;
 
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
 
-    public CommentResponse() {
+    public PostResponse() {
     }
 
-    public CommentResponse(UUID commentId,
-                           UUID postId,
-                           UUID userId,
-                           String content,
-                           LocalDateTime createdAt,
-                           LocalDateTime updatedAt) {
-        this.commentId = commentId;
+    public PostResponse(UUID postId,
+                        UUID userId,
+                        String imageUrl,
+                        String description,
+                        LocalDateTime createdAt,
+                        LocalDateTime updatedAt) {
         this.postId = postId;
         this.userId = userId;
-        this.content = content;
+        this.imageUrl = imageUrl;
+        this.description = description;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-    }
-
-    public UUID getCommentId() {
-        return commentId;
-    }
-
-    public void setCommentId(UUID commentId) {
-        this.commentId = commentId;
     }
 
     public UUID getPostId() {
@@ -59,12 +51,20 @@ public class CommentResponse implements Serializable {
         this.userId = userId;
     }
 
-    public String getContent() {
-        return content;
+    public String getImageUrl() {
+        return imageUrl;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public LocalDateTime getCreatedAt() {
