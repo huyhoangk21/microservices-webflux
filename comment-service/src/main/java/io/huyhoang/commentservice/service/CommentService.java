@@ -1,8 +1,10 @@
 package io.huyhoang.commentservice.service;
 
-import io.huyhoang.commentservice.dto.CommentDTO;
+import io.huyhoang.commentservice.dto.CommentRequest;
+import io.huyhoang.commentservice.dto.CommentResponse;
 import io.huyhoang.commentservice.entity.Comment;
 import io.huyhoang.commentservice.repository.CommentRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,12 +23,46 @@ public class CommentService {
         this.commentRepository = commentRepository;
     }
 
+    @Transactional(readOnly = true)
+    public Flux<CommentResponse> allByPost(UUID postId) {
+        return commentRepository.findAllCommentsByPost(postId)
+                .flatMap(this::convertDTO);
+    }
+
     @Transactional
-    public Mono<Comment> addComment(CommentDTO commentDTO, UUID postId) {
+    public Mono<CommentResponse> add(CommentRequest commentRequest, UUID postId) {
+        return commentRepository.save(new Comment(UUID.randomUUID(), postId, commentRequest.getContent()))
+                .flatMap(this::convertDTO);
 
-        Comment comment = new Comment(UUID.randomUUID(), postId, commentDTO.getContent());
 
-        return commentRepository.save(comment);
+    }
 
+    @Transactional
+    public Mono<CommentResponse> edit(CommentRequest commentRequest, UUID commentId) {
+        return commentRepository.findById(commentId)
+                .switchIfEmpty(Mono.error(new RuntimeException()))
+                .flatMap(comment -> {
+                    comment.setContent(commentRequest.getContent());
+                    return commentRepository.save(comment);
+                })
+                .flatMap(this::convertDTO);
+
+    }
+
+    @Transactional
+    public Mono<Void> delete(UUID commentId) {
+        return commentRepository.findById(commentId)
+                .switchIfEmpty(Mono.error(new RuntimeException()))
+                .flatMap(commentRepository::delete);
+    }
+
+    private Mono<CommentResponse> convertDTO(Comment comment) {
+        return Mono.just(new CommentResponse(
+                comment.getCommentId(),
+                comment.getPostId(),
+                comment.getUserId(),
+                comment.getContent(),
+                comment.getCreatedAt(),
+                comment.getUpdatedAt()));
     }
 }

@@ -1,10 +1,9 @@
 package io.huyhoang.commentservice.controller;
 
-import io.huyhoang.commentservice.dto.CommentDTO;
-import io.huyhoang.commentservice.entity.Comment;
+import io.huyhoang.commentservice.dto.CommentRequest;
+import io.huyhoang.commentservice.dto.CommentResponse;
 import io.huyhoang.commentservice.service.CommentService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -17,28 +16,47 @@ import java.util.UUID;
 public class CommentController {
 
     private final CommentService commentService;
-    Logger log = LoggerFactory.getLogger(CommentController.class);
 
     public CommentController(CommentService commentService) {
         this.commentService = commentService;
     }
 
+
+    @GetMapping
+    public Flux<CommentResponse> allCommentsByPost(@PathVariable("postId") UUID postId) {
+        return commentService.allByPost(postId);
+    }
+
     @PostMapping
-    public Mono<Comment> addComment(@Valid @RequestBody CommentDTO commentDTO,
-                                    @PathVariable("postId") UUID postId) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<CommentResponse> addComment(@Valid @RequestBody CommentRequest commentRequest,
+                                           @PathVariable("postId") UUID postId) {
 
         // check user from authorization header jwt
 
         // check if post exists - webclient call to posts
-
         // comment service add post
-        Mono<Comment> res = commentService.addComment(commentDTO, postId);
+        return commentService.add(commentRequest, postId);
         // return post
-        log.info("{}", res);
-
-        return res;
 
     }
+
+    @PutMapping(value = "/{commentId}")
+    public Mono<CommentResponse> editComment(@Valid @RequestBody CommentRequest commentRequest,
+                                             @PathVariable("commentId") UUID commentId) {
+
+        // check same user;
+        return commentService.edit(commentRequest, commentId);
+    }
+
+    @DeleteMapping(value = "/{commentId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public Mono<Void> deleteComment(@PathVariable("commentId") UUID commentId) {
+
+        // check same user;
+        return commentService.delete(commentId);
+    }
+
 
 
 }
