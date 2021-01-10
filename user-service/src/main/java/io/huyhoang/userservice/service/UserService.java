@@ -14,15 +14,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class UserService {
@@ -62,6 +60,7 @@ public class UserService {
                 .flatMap(this::convertDTO);
     }
 
+    @Transactional(readOnly = true)
     public Mono<ResponseEntity<UserResponse>> login(LoginRequest loginRequest) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -81,6 +80,13 @@ public class UserService {
                 });
     }
 
+    @Transactional(readOnly = true)
+    public Mono<UserResponse> findById(UUID userId) {
+        return userRepository.findById(userId)
+                .switchIfEmpty(Mono.error(new UsernameNotFoundException("Username not found")))
+                .flatMap(this::convertDTO);
+    }
+
     private Mono<UserResponse> convertDTO(User user) {
         return Mono.just(new UserResponse(
                 user.getUserId(),
@@ -89,4 +95,6 @@ public class UserService {
                 user.getCreatedAt(),
                 user.getUpdatedAt()));
     }
+
+
 }

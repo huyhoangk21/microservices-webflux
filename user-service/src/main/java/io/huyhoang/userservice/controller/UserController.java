@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/api/users")
@@ -33,5 +34,12 @@ public class UserController {
     public Mono<ResponseEntity<UserResponse>> login(@Valid @RequestBody LoginRequest loginRequest) {
         return userService.login(loginRequest);
     }
+
+    @GetMapping(value = "/{userId}")
+    public Mono<UserResponse> getById(@PathVariable("userId") UUID userId) {
+        return userService.findById(userId);
+    }
+
+
 
 }
