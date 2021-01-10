@@ -1,5 +1,6 @@
 package io.huyhoang.userservice.config;
 
+import io.huyhoang.userservice.exception.AuthFailureHandler;
 import io.huyhoang.userservice.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -36,7 +37,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("*").permitAll();//.hasIpAddress(environment.getProperty("gateway.ip"));
+                .antMatchers("*").hasIpAddress(environment.getProperty("gateway.ip"))
+                .and()
+                .exceptionHandling().authenticationEntryPoint(new AuthFailureHandler());
     }
 
     @Override

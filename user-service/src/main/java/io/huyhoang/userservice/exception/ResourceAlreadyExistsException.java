@@ -1,9 +1,16 @@
 package io.huyhoang.userservice.exception;
 
+import java.util.List;
+
 public class ResourceAlreadyExistsException extends RuntimeException {
 
-    public ResourceAlreadyExistsException(String message) {
-        super(message);
+    List<String> errors;
+
+    public ResourceAlreadyExistsException(List<String> errors) {
+        this.errors = errors;
     }
 
+    public List<String> getErrors() {
+        return errors;
+    }
 }

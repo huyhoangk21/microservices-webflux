@@ -21,6 +21,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 
 @Service
 public class UserService {
@@ -45,27 +47,27 @@ public class UserService {
     @Transactional
     public Mono<UserResponse> signup(SignupRequest signupRequest) {
         return userRepository.existsByUsername(signupRequest.getUsername())
-                .flatMap(value -> value ?
-                        Mono.error(new ResourceAlreadyExistsException("Username already exists")) :
-                        userRepository.existsByEmail(signupRequest.getEmail()))
-                .flatMap(value -> value ?
-                        Mono.error(new ResourceAlreadyExistsException("Email already exists")) :
-                        userRepository.save(
-                                new User(signupRequest.getUsername(),
-                                         signupRequest.getEmail(),
-                                         passwordEncoder.encode(signupRequest.getPassword())))
-                .flatMap(this::convertDTO));
-
+                .zipWith(userRepository.existsByEmail(signupRequest.getEmail()))
+                .flatMap(result -> {
+                    List<String> errors = new LinkedList<>();
+                    if (result.getT1()) errors.add("Username already exists");
+                    if (result.getT2()) errors.add("Email already exists");
+                    return errors.isEmpty() ? Mono.just(signupRequest) : Mono.error(new ResourceAlreadyExistsException(errors));
+                })
+                .then(userRepository.save(
+                        new User(signupRequest.getUsername(),
+                                signupRequest.getEmail(),
+                                passwordEncoder.encode(signupRequest.getPassword()))
+                ))
+                .flatMap(this::convertDTO);
     }
 
     public Mono<ResponseEntity<UserResponse>> login(LoginRequest loginRequest) {
-
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getEmail(),
                         loginRequest.getPassword(),
                         new HashSet<>()));
-
         return userRepository.findByEmail(loginRequest.getEmail())
                 .flatMap(this::convertDTO)
                 .flatMap(userResponse -> {
@@ -78,7 +80,6 @@ public class UserService {
                     return Mono.just(ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION, token).body(userResponse));
                 });
     }
-
 
     private Mono<UserResponse> convertDTO(User user) {
         return Mono.just(new UserResponse(

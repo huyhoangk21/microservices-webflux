@@ -33,6 +33,6 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<UserError> handleResourceAlreadyExists(ResourceAlreadyExistsException ex) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new UserError(Collections.singletonList(ex.getMessage())));
+                .body(new UserError(ex.getErrors()));
     }
 }

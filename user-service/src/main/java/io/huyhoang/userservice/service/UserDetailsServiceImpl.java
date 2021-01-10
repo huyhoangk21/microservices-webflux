@@ -1,6 +1,5 @@
 package io.huyhoang.userservice.service;
 
-import io.huyhoang.userservice.entity.User;
 import io.huyhoang.userservice.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,18 +22,16 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-
-        User user = userRepository.findByEmail(email)
+        return userRepository.findByEmail(email)
                 .switchIfEmpty(Mono.error(new UsernameNotFoundException("User not found")))
+                .flatMap(user -> Mono.just(new org.springframework.security.core.userdetails.User(
+                        user.getEmail(),
+                        user.getPassword(),
+                        true,
+                        true,
+                        true,
+                        true,
+                        new HashSet<>())))
                 .block();
-
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPassword(),
-                true,
-                true,
-                true,
-                true,
-                new HashSet<>());
     }
 }
